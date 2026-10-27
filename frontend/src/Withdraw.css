@@ -1,0 +1,96 @@
+
+.withdraw-page {
+    width: 100%;
+}
+
+.withdraw-heading {
+    margin-bottom: 24px;
+}
+
+.withdraw-heading h2 {
+    margin: 0 0 8px;
+    font-size: 26px;
+}
+
+.withdraw-heading p {
+    margin: 0;
+    color: #718096;
+}
+
+.withdraw-card {
+    max-width: 650px;
+    padding: 28px;
+    background: #fff;
+    border: 1px solid #e8edf3;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.withdraw-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.withdraw-field label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.withdraw-field input,
+.withdraw-field select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border: 1px solid #dbe2ea;
+    border-radius: 9px;
+    background: #fff;
+    color: #1e293b;
+    font: inherit;
+}
+
+.withdraw-field input:focus,
+.withdraw-field select:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.withdraw-message {
+    margin-bottom: 18px;
+    padding: 12px 14px;
+    border-radius: 9px;
+    font-size: 14px;
+}
+
+.withdraw-error {
+    color: #b91c1c;
+    background: #fef2f2;
+}
+
+.withdraw-success {
+    color: #166534;
+    background: #f0fdf4;
+}
+
+.withdraw-submit {
+    width: 100%;
+    padding: 13px 16px;
+    border: none;
+    border-radius: 9px;
+    background: #2563eb;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.withdraw-submit:hover {
+    background: #1d4ed8;
+}
+
+.withdraw-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
