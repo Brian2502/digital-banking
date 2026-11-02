@@ -24,6 +24,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import java.util.UUID;
+
+
 
 @SpringBootTest(properties = {
         "app.jwt.secret=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
@@ -47,23 +50,29 @@ class TransactionRollbackIntegrationTest {
 
     @Test
     void transfer_shouldRollbackBothBalances_whenSecondTransactionSaveFails() {
+        // Tạo account number riêng cho mỗi lần chạy test
+        String sourceAccountNumber =
+                "99" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
+
+        String destinationAccountNumber =
+                "99" + UUID.randomUUID().toString().replace("-", "").substring(0, 10);
         // 1. Tạo user test
         User user = new User();
         user.setFullName("Rollback Test User");
-        user.setEmail("rollback-test@example.com");
+        user.setEmail("rollback-test-" + UUID.randomUUID() + "@example.com");
         user.setPassword("test-password");
         user.setRole(UserRole.USER);
         user = userRepository.saveAndFlush(user);
 
         // 2. Tạo hai tài khoản
         BankAccount source = new BankAccount();
-        source.setAccountNumber("990000000001");
+        source.setAccountNumber(sourceAccountNumber);
         source.setBalance(new BigDecimal("500000.00"));
         source.setUser(user);
         source = bankAccountRepository.saveAndFlush(source);
 
         BankAccount destination = new BankAccount();
-        destination.setAccountNumber("990000000002");
+        destination.setAccountNumber(destinationAccountNumber);
         destination.setBalance(new BigDecimal("100000.00"));
         destination.setUser(user);
         destination = bankAccountRepository.saveAndFlush(destination);
@@ -88,8 +97,8 @@ class TransactionRollbackIntegrationTest {
         }).when(transactionRepositorySpy).save(any(Transaction.class));
 
         TransferRequest request = new TransferRequest(
-                "990000000001",
-                "990000000002",
+                sourceAccountNumber,
+                destinationAccountNumber,
                 new BigDecimal("200000.00")
         );
 

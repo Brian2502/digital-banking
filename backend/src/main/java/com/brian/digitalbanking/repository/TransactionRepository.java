@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.math.BigDecimal;
 
 
 public interface TransactionRepository
@@ -51,6 +53,21 @@ public interface TransactionRepository
     Page<Transaction> findByAccount_User_IdOrderByCreatedAtDesc(
             Long userId,
             Pageable pageable
+    );
+
+    @Query("""
+    SELECT COALESCE(SUM(t.amount), 0)
+    FROM Transaction t
+    WHERE t.account.user.id = :userId
+      AND t.type IN :types
+      AND t.createdAt >= :fromDate
+      AND t.createdAt < :toDate
+    """)
+    BigDecimal sumAmountByUserAndTypes(
+            @Param("userId") Long userId,
+            @Param("types") Collection<TransactionType> types,
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate
     );
 
 }

@@ -19,6 +19,12 @@ import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.util.List;
+import com.brian.digitalbanking.dto.dashboard.MonthlyCashFlow;
+import com.brian.digitalbanking.entity.TransactionType;
+
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.util.ArrayList;
 
 @Service
 public class DashboardService {
@@ -78,10 +84,49 @@ public class DashboardService {
                         ))
                         .toList();
 
+        YearMonth currentMonth = YearMonth.now();
+        List<MonthlyCashFlow> monthlyCashFlow = new ArrayList<>();
+
+        for (int i = 5; i >= 0; i--) {
+            YearMonth month = currentMonth.minusMonths(i);
+
+            LocalDateTime fromDate = month.atDay(1).atStartOfDay();
+            LocalDateTime toDate = month.plusMonths(1)
+                    .atDay(1)
+                    .atStartOfDay();
+
+            BigDecimal income = transactionRepository.sumAmountByUserAndTypes(
+                    user.getId(),
+                    List.of(
+                            TransactionType.DEPOSIT,
+                            TransactionType.TRANSFER_IN
+                    ),
+                    fromDate,
+                    toDate
+            );
+
+            BigDecimal expense = transactionRepository.sumAmountByUserAndTypes(
+                    user.getId(),
+                    List.of(
+                            TransactionType.WITHDRAWAL,
+                            TransactionType.TRANSFER_OUT
+                    ),
+                    fromDate,
+                    toDate
+            );
+
+            monthlyCashFlow.add(new MonthlyCashFlow(
+                    month.toString(),
+                    income,
+                    expense
+            ));
+        }
+
         return new DashboardResponse(
                 accounts.size(),
                 totalBalance,
-                recentTransactions
+                recentTransactions,
+                monthlyCashFlow
         );
     }
 }

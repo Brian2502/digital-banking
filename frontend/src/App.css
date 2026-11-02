@@ -1030,4 +1030,143 @@ input:focus-visible {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
+
+}
+
+  /* Cash Flow Chart */
+  .cash-flow-panel {
+    margin-bottom: 24px;
+    padding: 24px;
+  }
+
+  .cash-flow-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin: 20px 0;
+  }
+
+  .cash-flow-summary > div {
+    display: grid;
+    grid-template-columns: 12px 1fr;
+    align-items: center;
+    gap: 6px 10px;
+  }
+
+  .cash-flow-summary > div strong {
+    grid-column: 2;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .cash-flow-summary > div > span:nth-child(2) {
+    color: #64748b;
+    font-size: 13px;
+  }
+
+  .cash-flow-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .income-dot {
+    background: #16a34a;
+  }
+
+  .expense-dot {
+    background: #f97316;
+  }
+
+  .cash-flow-chart {
+    width: 100%;
+    height: 300px;
+  }
+
+@media (max-width: 600px) {
+  .cash-flow-panel {
+    padding: 16px;
+  }
+
+  .cash-flow-summary {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .cash-flow-chart {
+    height: 260px;
+  }
+}
+
+
+
+
+
+  /* My Accounts layout fix */
+  .accounts-panel {
+    width: 100%;
+    min-width: 0;
+    padding: 24px;
+    overflow: hidden;
+  }
+
+  .accounts-panel .panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 24px;
+  }
+
+  .accounts-panel .panel-heading > div {
+    min-width: 0;
+  }
+
+  .accounts-panel .panel-heading h2 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  .accounts-panel .panel-heading p {
+    margin: 6px 0 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .accounts-panel .view-all {
+    flex-shrink: 0;
+    padding: 8px 0 8px 12px;
+  }
+
+  .accounts-panel .table-scroll {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .accounts-panel .transactions-table {
+    width: 100%;
+    min-width: 500px;
+    border-collapse: collapse;
+  }
+
+  .accounts-panel .transactions-table th,
+  .accounts-panel .transactions-table td {
+    padding: 18px 12px;
+    vertical-align: middle;
+  }
+
+@media (max-width: 600px) {
+  .accounts-panel {
+    padding: 16px 12px;
+  }
+
+  .accounts-panel .panel-heading {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .accounts-panel .panel-heading h2 {
+    font-size: 16px;
+  }
 }

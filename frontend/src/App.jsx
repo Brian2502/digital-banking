@@ -6,6 +6,16 @@ import Transfer from "./Transfer";
 import Deposit from "./Deposit";
 import Withdraw from "./Withdraw";
 import TransactionHistory from "./TransactionHistory";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+} from "recharts";
 
 import {
   LayoutDashboard,
@@ -44,6 +54,18 @@ const formatMoney = (amount) =>
       maximumFractionDigits: 0,
     }).format(amount);
 
+const formatMonth = (month) => {
+  const [year, monthNumber] = month.split("-");
+  return `${monthNumber}/${year.slice(2)}`;
+};
+
+const cashFlowData = (dashboardData) =>
+    (dashboardData?.monthlyCashFlow ?? []).map((item) => ({
+      month: formatMonth(item.month),
+      income: Number(item.income ?? 0),
+      expense: Number(item.expense ?? 0),
+    }));
+
 const navigation = [
   { label: "Dashboard", icon: LayoutDashboard },
   { label: "My Accounts", icon: Wallet },
@@ -61,6 +83,14 @@ function App() {
   const [loggedIn, setLoggedIn] = useState(
       Boolean(sessionStorage.getItem("token"))
   );
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  });
+
 
   const [dashboardData, setDashboardData] = useState(null);
   const [accounts, setAccounts] = useState([]);
@@ -93,13 +123,20 @@ function App() {
 
 
   function handleLogin() {
+    setCurrentUser(
+        JSON.parse(sessionStorage.getItem("user") || "null")
+    );
     setLoggedIn(true);
   }
 
   function handleLogout() {
     sessionStorage.removeItem("token");
     sessionStorage.removeItem("user");
+
+    setCurrentUser(null);
     setDashboardData(null);
+    setAccounts([]);
+    setActivePage("Dashboard");
     setLoggedIn(false);
   }
 
@@ -140,18 +177,28 @@ function App() {
   }
 
   const refreshBankingData = async () => {
-    const [dashboardResponse, accountsResponse] = await Promise.all([
-      api.get("/dashboard"),
-      api.get("/accounts/me"),
-    ]);
+    try {
+      const [dashboardResponse, accountsResponse] = await Promise.all([
+        api.get("/dashboard"),
+        api.get("/accounts/me"),
+      ]);
 
-    setDashboardData(dashboardResponse.data);
+      setDashboardData(dashboardResponse.data);
 
-    setAccounts(
-        Array.isArray(accountsResponse.data)
-            ? accountsResponse.data
-            : [accountsResponse.data]
-    );
+      setAccounts(
+          Array.isArray(accountsResponse.data)
+              ? accountsResponse.data
+              : [accountsResponse.data]
+      );
+    } catch (error) {
+      console.error("Failed to refresh banking data:", error);
+
+      if (error.response?.status === 401) {
+        handleLogout();
+      }
+
+      throw error;
+    }
   };
 
   return (
@@ -226,8 +273,19 @@ function App() {
                 <Bell size={21} />
                 <span className="notification-dot" />
               </button>
-              <div className="avatar">U</div>
-              <span className="user-name">User Demo</span>
+              <div className="avatar">
+                {(currentUser?.fullName || currentUser?.name || currentUser?.email || "U")
+                    .charAt(0)
+                    .toUpperCase()}
+              </div>
+
+              <span className="user-name">
+                {currentUser?.fullName ||
+                    currentUser?.name ||
+                    currentUser?.email ||
+                    "User"}
+              </span>
+
               <ChevronDown size={16} className="user-chevron" />
             </div>
           </header>
@@ -287,6 +345,97 @@ function App() {
                     <ChevronRight className="stat-arrow" size={20} />
                   </article>
                 </div>
+
+                <section className="panel cash-flow-panel">
+                  <div className="panel-heading">
+                    <div>
+                      <h2>Cash Flow</h2>
+                      <p>Income vs. expenses · Last 6 months</p>
+                    </div>
+                  </div>
+
+                  <div className="cash-flow-summary">
+                    <div>
+                      <span className="cash-flow-dot income-dot" />
+                      <span>Total income this month</span>
+                      <strong>
+                        {formatMoney(
+                            Number(
+                                dashboardData?.monthlyCashFlow?.at(-1)?.income ?? 0
+                            )
+                        )}
+                      </strong>
+                    </div>
+
+                    <div>
+                      <span className="cash-flow-dot expense-dot" />
+                      <span>Total expenses this month</span>
+                      <strong>
+                        {formatMoney(
+                            Number(
+                                dashboardData?.monthlyCashFlow?.at(-1)?.expense ?? 0
+                            )
+                        )}
+                      </strong>
+                    </div>
+                  </div>
+
+                  <div className="cash-flow-chart">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                          data={cashFlowData(dashboardData)}
+                          margin={{ top: 12, right: 12, left: 8, bottom: 4 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+
+                        <XAxis
+                            dataKey="month"
+                            tickLine={false}
+                            axisLine={false}
+                        />
+
+                        <YAxis
+                            tickLine={false}
+                            axisLine={false}
+                            width={75}
+                            tickFormatter={(value) =>
+                                new Intl.NumberFormat("vi-VN", {
+                                  notation: "compact",
+                                  maximumFractionDigits: 1,
+                                }).format(value)
+                            }
+                        />
+
+                        <Tooltip
+                            formatter={(value, name) => [
+                              formatMoney(Number(value)),
+                              name === "income" ? "Income" : "Expenses",
+                            ]}
+                        />
+
+                        <Legend
+                            formatter={(value) =>
+                                value === "income" ? "Income" : "Expenses"
+                            }
+                        />
+
+                        <Bar
+                            dataKey="income"
+                            name="income"
+                            fill="#16a34a"
+                            radius={[5, 5, 0, 0]}
+                        />
+
+                        <Bar
+                            dataKey="expense"
+                            name="expense"
+                            fill="#f97316"
+                            radius={[5, 5, 0, 0]}
+                        />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </section>
 
                 <section className="panel transaction-panel">
                   <div className="panel-heading">
@@ -491,6 +640,61 @@ function App() {
         {activePage === "Transaction History" && (
             <TransactionHistory />
         )}
+
+        {activePage === "My Accounts" && (
+            <section className="panel accounts-panel">
+              <div className="panel-heading">
+                <div>
+                  <h2>My Accounts</h2>
+                  <p>Manage your bank accounts and balances</p>
+                </div>
+
+                <button
+                    className="view-all"
+                    onClick={refreshBankingData}
+                >
+                  Refresh
+                </button>
+              </div>
+
+              <div className="table-scroll">
+                <table className="transactions-table">
+                  <thead>
+                  <tr>
+                    <th>Account Number</th>
+                    <th>Balance</th>
+                    <th>Status</th>
+                  </tr>
+                  </thead>
+
+                  <tbody>
+                  {accounts.length === 0 ? (
+                      <tr>
+                        <td colSpan={3} className="empty-state">
+                          No bank accounts found.
+                        </td>
+                      </tr>
+                  ) : (
+                      accounts.map((account) => (
+                          <tr key={account.id}>
+                            <td>{account.accountNumber}</td>
+                            <td className="balance-cell">
+                              {formatMoney(Number(account.balance))}
+                            </td>
+                            <td>
+                <span className="transaction-badge deposit-badge">
+                  {account.status}
+                </span>
+                            </td>
+                          </tr>
+                      ))
+                  )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+        )}
+
         </main>
       </div>
   );
