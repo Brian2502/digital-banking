@@ -72,12 +72,17 @@ public class SecurityConfig {
     }
 
 
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
         configuration.setAllowedOrigins(
-                List.of("http://localhost:5173")
+                List.of(
+                        "http://localhost:5173",
+                        "https://digital-banking-amber.vercel.app",
+                        "https://digital-banking-orhyw2vyn-brian2502.vercel.app"
+                )
         );
 
         configuration.setAllowedMethods(
@@ -97,5 +102,6 @@ public class SecurityConfig {
 
         return source;
     }
+
 
 }
