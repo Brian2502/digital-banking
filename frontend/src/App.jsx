@@ -231,10 +231,12 @@ function App() {
 
         <aside className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
           <div className="brand">
-            <div className="brand-icon">
-              <Landmark size={30} />
-            </div>
-            <span>Digital Banking</span>
+            <img
+                src="/digital-banking-logo.png"
+                alt="Digital Banking"
+                className="brand-logo"
+            />
+
             <button
                 className="mobile-close"
                 onClick={() => setSidebarOpen(false)}

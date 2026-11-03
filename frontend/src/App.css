@@ -56,20 +56,25 @@ input:focus-visible {
 .brand {
   display: flex;
   align-items: center;
-  gap: 11px;
-  min-height: 43px;
-  margin: 0 10px 42px;
-  color: #fff;
-  font-size: 17px;
-  font-weight: 800;
-  letter-spacing: -0.5px;
-  white-space: nowrap;
+  justify-content: center;
+  position: relative;
+  padding: 20px;
+  min-height: 100px;
 }
 
-.brand-icon {
-  display: grid;
-  place-items: center;
-  color: #61a5ff;
+.brand-logo {
+  width: 190px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+.mobile-close {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .navigation {
