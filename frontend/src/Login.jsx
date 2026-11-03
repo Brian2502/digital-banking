@@ -4,7 +4,7 @@ import { Landmark, LockKeyhole, Mail } from "lucide-react";
 import api from "./api";
 import "./Login.css";
 
-function Login({ onLogin }) {
+function Login({ onLogin, onSwitchToRegister }) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
@@ -86,7 +86,14 @@ function Login({ onLogin }) {
                 </button>
 
                 <p className="login-note">
-                    Sử dụng tài khoản đã đăng ký trong hệ thống Digital Banking.
+                    Chưa có tài khoản?{" "}
+                    <button
+                        type="button"
+                        className="auth-link"
+                        onClick={onSwitchToRegister}
+                    >
+                        Đăng ký ngay
+                    </button>
                 </p>
             </form>
         </main>

@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import api from "./api";
+import Register from "./Register";
 import Login from "./Login";
 import Transfer from "./Transfer";
 import Deposit from "./Deposit";
@@ -79,6 +80,7 @@ function App() {
   const [activePage, setActivePage] = useState("Dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const [authPage, setAuthPage] = useState("login");
 
   const [loggedIn, setLoggedIn] = useState(
       Boolean(sessionStorage.getItem("token"))
@@ -173,7 +175,16 @@ function App() {
   }, [loggedIn]);
 
   if (!loggedIn) {
-    return <Login onLogin={handleLogin} />;
+    return authPage === "register" ? (
+        <Register
+            onSwitchToLogin={() => setAuthPage("login")}
+        />
+    ) : (
+        <Login
+            onLogin={handleLogin}
+            onSwitchToRegister={() => setAuthPage("register")}
+        />
+    );
   }
 
   const refreshBankingData = async () => {

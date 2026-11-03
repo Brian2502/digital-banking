@@ -105,3 +105,27 @@
     text-align: center;
     line-height: 1.5;
 }
+
+
+
+
+.register-success {
+    color: #16a34a;
+    font-size: 14px;
+    text-align: center;
+    margin: 12px 0;
+}
+
+.auth-link {
+    border: none;
+    background: none;
+    color: #2563eb;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: inherit;
+}
+
+.auth-link:hover {
+    text-decoration: underline;
+}
+
