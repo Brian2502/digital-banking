@@ -1,52 +1,78 @@
 # Digital Banking
 
-A banking web application built with Spring Boot and React.
+A full-stack digital banking application built with **Java Spring Boot, Spring Security, React, and PostgreSQL**. The project simulates essential banking operations with a focus on secure API development, transaction consistency, and automated testing.
 
-I built this project to practice developing a backend application with Java and Spring Boot, especially authentication, account management, and handling financial transactions.
+## Live Demo
 
-Users can log in, view their bank account, deposit and withdraw money, transfer funds to another account, and check their transaction history.
+- **Frontend:** https://digital-banking-amber.vercel.app
+- **Backend API:** https://digital-banking-api-4neg.onrender.com
+- **Health Check:** https://digital-banking-api-4neg.onrender.com/api/health
 
-## Tech Stack
-
-**Backend**
-- Java 21
-- Spring Boot 4.1.1
-- Spring Security
-- Spring Data JPA / Hibernate
-- PostgreSQL
-- JWT (JJWT)
-
-**Frontend**
-- React 19
-- Vite
-- Axios
-- Recharts
-- Lucide React
+> This is an educational portfolio project. It does not process real money or connect to real banking systems.
 
 ## Features
 
-- User registration and login
-- JWT authentication
-- View bank account information and balance
-- Deposit and withdraw money
-- Transfer money between accounts
-- View transaction history with pagination and date filters
-- Validate transaction amounts and account status
+### Authentication & Authorization
+- User registration and login.
+- JWT-based authentication.
+- Role-based authorization with Spring Security.
+- Stateless authentication using JWT filters.
 
-## A Closer Look at Transfers
+### Banking Operations
+- Create and manage bank accounts.
+- View account information and balances.
+- Deposit and withdraw funds.
+- Transfer funds between accounts.
+- View transaction history with pagination and date filters.
 
-One of the parts I spent more time on was handling money transfers correctly.
+### Transaction Integrity
+- Transactional processing with `@Transactional`.
+- Rollback handling when a transaction fails.
+- Basic concurrency testing for transaction operations.
+- Balance consistency checks during banking operations.
 
-A transfer updates two accounts: money is deducted from the sender and added to the receiver. Both balance updates and the related transaction records need to succeed together.
+### Frontend
+- Responsive banking dashboard.
+- Account overview and balance display.
+- Deposit, withdrawal, and transfer forms.
+- Transaction history and filtering.
+- Banking-themed user interface.
 
-I used Spring's `@Transactional` so that a failure during the operation rolls back the database changes.
+## Technology Stack
 
-I also used JPA pessimistic write locking to prevent concurrent operations from incorrectly updating the same account balance. When locking two accounts for a transfer, they are retrieved in a consistent order to help reduce deadlock risk.
+| Layer | Technologies |
+|---|---|
+| Backend | Java 21, Spring Boot |
+| Security | Spring Security, JWT |
+| Data Access | Spring Data JPA, Hibernate |
+| Database | PostgreSQL |
+| Frontend | React, JavaScript, CSS |
+| Build Tool | Maven |
+| Deployment | Render, Vercel |
+| Testing | JUnit, Spring Boot Test |
 
-I added integration tests to check:
-- Whether account balances are restored when a transfer fails.
-- Whether two concurrent transfers from the same account produce the expected result.
-- Whether the transaction records remain consistent with the account balances.
+## Architecture
+
+```text
+React Frontend
+      |
+      | REST API / JSON
+      v
+Spring Boot Backend
+      |
+      +-- Controller Layer
+      |
+      +-- Service Layer
+      |
+      +-- Repository Layer
+      |
+      +-- Spring Security / JWT
+      |
+      v
+PostgreSQL Database
+```
+
+The backend follows a layered architecture to separate API handling, business logic, data access, and security responsibilities.
 
 ## Project Structure
 
@@ -55,66 +81,54 @@ digital-banking/
 ├── backend/
 │   ├── src/
 │   │   ├── main/
-│   │   │   └── java/com/brian/digitalbanking/
-│   │   │       ├── config/
-│   │   │       ├── controller/
-│   │   │       ├── dto/
-│   │   │       ├── entity/
-│   │   │       ├── exception/
-│   │   │       ├── repository/
-│   │   │       ├── security/
-│   │   │       └── service/
+│   │   │   └── java/
 │   │   └── test/
-│   └── pom.xml
+│   ├── pom.xml
+│   └── mvnw
 │
-├── frontend/
-│   ├── src/
-│   ├── public/
-│   └── package.json
-│
-└── README.md
+└── frontend/
+    ├── public/
+    ├── src/
+    ├── package.json
+    └── index.html
 ```
 
 ## Getting Started
 
-### Requirements
+### Prerequisites
 
 - Java 21
 - PostgreSQL
-- Node.js compatible with Vite 8
-- npm
+- Node.js and npm
 
-### 1. Clone the project
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Brian2502/digital-banking.git
 cd digital-banking
 ```
 
-### 2. Create the database
+### 2. Configure the database
 
-Create a PostgreSQL database:
+Create a PostgreSQL database named:
 
 ```sql
 CREATE DATABASE digital_banking;
 ```
 
-### 3. Configure the backend
+Configure the database connection and application secrets using the backend configuration or environment variables.
 
-Set the following environment variables before starting the backend:
+Do not commit real database passwords or JWT secrets to Git.
 
-```powershell
-$env:DB_URL="jdbc:postgresql://localhost:5432/digital_banking"
-$env:DB_USERNAME="postgres"
-$env:DB_PASSWORD=""
-$env:JWT_SECRET=""
+### 3. Run the backend
+
+Open a terminal:
+
+```bash
+cd backend
 ```
 
-Do not commit real database credentials or JWT secrets.
-
-### 4. Start the backend
-
-Open a terminal in the `backend` directory:
+On Windows PowerShell:
 
 ```powershell
 .\mvnw.cmd spring-boot:run
@@ -126,18 +140,24 @@ The backend runs at:
 http://localhost:8082
 ```
 
-To run tests:
+### 4. Run the frontend
 
-```powershell
-.\mvnw.cmd test
-```
-
-### 5. Start the frontend
-
-Open another terminal in the `frontend` directory:
+Open another terminal:
 
 ```bash
+cd frontend
 npm install
+```
+
+Create or configure the frontend environment variable:
+
+```env
+VITE_API_BASE_URL=http://localhost:8082/api
+```
+
+Start the development server:
+
+```bash
 npm run dev
 ```
 
@@ -147,33 +167,46 @@ The frontend runs at:
 http://localhost:5173
 ```
 
-## Tests
+## Running Tests
 
-The backend includes unit and integration tests for the main transaction flows.
+From the backend directory:
 
-Current test classes:
+**Windows PowerShell**
 
-- `DigitalBankingApplicationTests`
-- `TransactionServiceTest`
-- `TransactionRollbackIntegrationTest`
-- `TransactionConcurrencyIntegrationTest`
+```powershell
+.\mvnw.cmd test
+```
 
-The integration tests use PostgreSQL and check transaction rollback and concurrent transfer behavior.
+The test suite includes unit and integration tests for core application flows, transaction rollback, and basic concurrency scenarios.
 
-## What I Learned
+## Key Engineering Concepts
 
-While building this project, I got more practical experience with:
+This project demonstrates practical experience with:
 
-- Structuring a Spring Boot application using controllers, services, and repositories.
-- Implementing JWT authentication with Spring Security.
-- Working with JPA, Hibernate, and PostgreSQL.
-- Managing database transactions with `@Transactional`.
-- Using pessimistic locking when multiple requests may update the same account.
-- Writing unit tests and integration tests for backend business logic.
+- RESTful API design.
+- Layered architecture and dependency injection.
+- DTO validation and exception handling.
+- JWT authentication and role-based authorization.
+- Spring Data JPA and Hibernate.
+- Database transaction management.
+- Rollback behavior and concurrency testing.
+- Unit and integration testing.
 
-## Future Improvements
+## Deployment
 
-- Add refresh token support.
-- Use Flyway for database migrations.
-- Improve frontend loading performance.
-- Add Docker support and deploy the application.
+| Component | Platform |
+|---|---|
+| Frontend | Vercel |
+| Backend | Render |
+| Database | PostgreSQL |
+
+The application is deployed as separate frontend and backend services.
+
+## Author
+
+**Hà Hoàng Uy Vũ**
+
+Java Backend Developer | Spring Boot
+
+- GitHub: https://github.com/Brian2502
+
