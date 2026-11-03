@@ -81,7 +81,8 @@ public class SecurityConfig {
                 List.of(
                         "http://localhost:5173",
                         "https://digital-banking-amber.vercel.app",
-                        "https://digital-banking-orhyw2vyn-brian2502.vercel.app"
+                        "https://digital-banking-orhyw2vyn-brian2502.vercel.app",
+                        "https://digital-banking-i9wr92b1j-brian2502.vercel.app"
                 )
         );
 
