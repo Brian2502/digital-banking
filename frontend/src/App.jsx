@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import api from "./api";
 import Register from "./Register";
 import Login from "./Login";
+import CreateAccount from "./CreateAccount";
 import Transfer from "./Transfer";
 import Deposit from "./Deposit";
 import Withdraw from "./Withdraw";
@@ -81,6 +82,8 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [authPage, setAuthPage] = useState("login");
+  const [showCreateAccount, setShowCreateAccount] = useState(false);
+
 
   const [loggedIn, setLoggedIn] = useState(
       Boolean(sessionStorage.getItem("token"))
@@ -96,6 +99,10 @@ function App() {
 
   const [dashboardData, setDashboardData] = useState(null);
   const [accounts, setAccounts] = useState([]);
+  const totalAccountBalance = accounts.reduce(
+      (total, account) => total + Number(account.balance ?? 0),
+      0
+  );
 
   const transactions = (
       dashboardData?.recentTransactions ?? []
@@ -306,14 +313,22 @@ function App() {
             <section className="welcome-row">
               <div>
                 <p className="eyebrow">YOUR FINANCES AT A GLANCE</p>
-                <h1>Good morning, User Demo <span>👋</span></h1>
+                <h1>
+                  Good morning, {currentUser?.fullName || currentUser?.name || "there"}
+                </h1>
                 <p className="welcome-subtitle">
                   Here&apos;s your account summary and recent transactions.
                 </p>
               </div>
               <div className="current-date">
                 <History size={17} />
-                <span>October 22, 2026</span>
+                <span>
+                  {new Date().toLocaleDateString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                  })}
+                </span>
               </div>
             </section>
 
@@ -409,12 +424,21 @@ function App() {
                             tickLine={false}
                             axisLine={false}
                             width={75}
-                            tickFormatter={(value) =>
-                                new Intl.NumberFormat("vi-VN", {
-                                  notation: "compact",
-                                  maximumFractionDigits: 1,
-                                }).format(value)
-                            }
+                            tickFormatter={(value) => {
+                              if (value >= 1_000_000_000) {
+                                return `${(value / 1_000_000_000).toFixed(1)} tỷ`;
+                              }
+
+                              if (value >= 1_000_000) {
+                                return `${(value / 1_000_000).toFixed(0)} triệu`;
+                              }
+
+                              if (value >= 1_000) {
+                                return `${(value / 1_000).toFixed(0)} nghìn`;
+                              }
+
+                              return `${value} đ`;
+                            }}
                         />
 
                         <Tooltip
@@ -527,33 +551,34 @@ function App() {
               </section>
 
               <aside className="right-column">
+
                 <section className="account-card">
                   <div className="account-card-top">
                     <div>
-                      <p className="account-label">MY ACCOUNT</p>
+                      <p className="account-label">TOTAL ACCOUNT BALANCE</p>
                       <p className="account-number">
-                        {accounts[0]?.accountNumber
-                            ? accounts[0].accountNumber.replace(/(\d{4})(?=\d)/g, "$1 ")
-                            : "No account"}
+                        {accounts.length} Bank Accounts
                       </p>
                     </div>
                     <div className="account-card-icon">
                       <CreditCard size={25} />
                     </div>
                   </div>
+
                   <p className="account-balance">
-                    {formatMoney(Number(accounts[0]?.balance ?? 0))}
+                    {formatMoney(totalAccountBalance)}
                   </p>
-                  <p className="available-label">Available balance</p>
-                  <p className="available-label">
-                    Status: {accounts[0]?.status ?? "Loading..."}
-                  </p>
-                  <div className="card-decoration decoration-one" />
-                  <div className="card-decoration decoration-two" />
-                  <div className="card-dots">
-                    <span className="selected" />
-                    <span />
-                    <span />
+                  <p className="available-label">Total available balance</p>
+
+                  <div className="account-card-accounts">
+                    {accounts.map((account) => (
+                        <div className="account-mini-row" key={account.id}>
+                          <span>
+                            {account.accountNumber.replace(/(\d{4})(?=\d)/g, "$1 ")}
+                          </span>
+                          <strong>{formatMoney(Number(account.balance ?? 0))}</strong>
+                        </div>
+                    ))}
                   </div>
                 </section>
 
@@ -630,81 +655,155 @@ function App() {
           </div>
         )}
 
-        {activePage === "Transfer" && (
-            <Transfer
-                accounts={accounts}
-                onSuccess={refreshBankingData}
-            />
-        )}
-        {activePage === "Deposit" && (
-            <Deposit
-                accounts={accounts}
-                onSuccess={refreshBankingData}
-            />
-        )}
-        {activePage === "Withdraw" && (
-            <Withdraw
-                accounts={accounts}
-                onSuccess={refreshBankingData}
-            />
-        )}
-        {activePage === "Transaction History" && (
-            <TransactionHistory />
-        )}
 
-        {activePage === "My Accounts" && (
-            <section className="panel accounts-panel">
-              <div className="panel-heading">
-                <div>
-                  <h2>My Accounts</h2>
-                  <p>Manage your bank accounts and balances</p>
-                </div>
-
-                <button
-                    className="view-all"
-                    onClick={refreshBankingData}
-                >
-                  Refresh
-                </button>
+          {activePage === "Transfer" && (
+              <div className="page-content">
+                <Transfer
+                    accounts={accounts}
+                    onSuccess={refreshBankingData}
+                />
               </div>
+          )}
 
-              <div className="table-scroll">
-                <table className="transactions-table">
-                  <thead>
-                  <tr>
-                    <th>Account Number</th>
-                    <th>Balance</th>
-                    <th>Status</th>
-                  </tr>
-                  </thead>
-
-                  <tbody>
-                  {accounts.length === 0 ? (
-                      <tr>
-                        <td colSpan={3} className="empty-state">
-                          No bank accounts found.
-                        </td>
-                      </tr>
-                  ) : (
-                      accounts.map((account) => (
-                          <tr key={account.id}>
-                            <td>{account.accountNumber}</td>
-                            <td className="balance-cell">
-                              {formatMoney(Number(account.balance))}
-                            </td>
-                            <td>
-                <span className="transaction-badge deposit-badge">
-                  {account.status}
-                </span>
-                            </td>
-                          </tr>
-                      ))
-                  )}
-                  </tbody>
-                </table>
+          {activePage === "Deposit" && (
+              <div className="page-content">
+                <Deposit
+                    accounts={accounts}
+                    onSuccess={refreshBankingData}
+                />
               </div>
-            </section>
-        )}
+          )}
+
+          {activePage === "Withdraw" && (
+              <div className="page-content">
+                <Withdraw
+                    accounts={accounts}
+                    onSuccess={refreshBankingData}
+                />
+              </div>
+          )}
+
+          {activePage === "Transaction History" && (
+              <div className="page-content">
+                <TransactionHistory />
+              </div>
+          )}
+
+
+
+          {activePage === "My Accounts" && (
+              <div className="page-content accounts-page">
+                {showCreateAccount && (
+                    <CreateAccount
+                        onSuccess={refreshBankingData}
+                        onCancel={() => setShowCreateAccount(false)}
+                    />
+                )}
+
+
+                <section className="panel accounts-panel">
+                  <div className="panel-heading">
+                    <div>
+                      <h2>My Accounts</h2>
+                      <p>Manage your bank accounts and balances</p>
+                    </div>
+
+                    <div className="account-page-actions">
+                      <button
+                          className="view-all"
+                          onClick={refreshBankingData}
+                      >
+                        Refresh
+                      </button>
+
+                      <button
+                          className="create-account-button"
+                          onClick={() => setShowCreateAccount(true)}
+                      >
+                        <Plus size={17} />
+                        Open New Account
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="account-summary-grid">
+                    <div className="account-summary-card">
+                      <div className="account-summary-icon">
+                        <Wallet size={23} />
+                      </div>
+                      <div>
+                        <p>Total Balance</p>
+                        <h3>{formatMoney(totalAccountBalance)}</h3>
+                        <span>Across all accounts</span>
+                      </div>
+                    </div>
+
+                    <div className="account-summary-card">
+                      <div className="account-summary-icon">
+                        <CreditCard size={23} />
+                      </div>
+                      <div>
+                        <p>Active Accounts</p>
+                        <h3>
+                          {accounts.filter(
+                              (account) => account.status === "ACTIVE"
+                          ).length}
+                        </h3>
+                        <span>Available bank accounts</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="account-list-section">
+                    <div className="account-list-heading">
+                      <h3>Your Bank Accounts</h3>
+                      <span>{accounts.length} accounts</span>
+                    </div>
+
+                    <div className="account-list">
+                      {accounts.length === 0 ? (
+                          <div className="empty-state">
+                            No bank accounts found.
+                          </div>
+                      ) : (
+                          accounts.map((account) => (
+                              <div className="account-item" key={account.id}>
+                                <div className="account-item-left">
+                                  <div className="account-item-icon">
+                                    <CreditCard size={23} />
+                                  </div>
+
+                                  <div className="account-item-info">
+                                    <strong>
+                                      {account.accountNumber.replace(
+                                          /(\d{4})(?=\d)/g,
+                                          "$1 "
+                                      )}
+                                    </strong>
+                                    <span>Payment Account</span>
+                                    <span className="account-status">
+                                      <span className="status-dot" />
+                                      {account.status}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="account-item-balance">
+                                  <strong>
+                                    {formatMoney(Number(account.balance ?? 0))}
+                                  </strong>
+                                  <span>Available balance</span>
+                                </div>
+                              </div>
+                          ))
+                      )}
+                    </div>
+                  </div>
+                </section>
+
+              </div>
+          )}
+
 
         </main>
       </div>
