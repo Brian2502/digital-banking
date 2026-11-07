@@ -47,7 +47,7 @@ function Login({ onLogin, onSwitchToRegister }) {
             <form className="login-card" onSubmit={handleSubmit}>
                 <div className="login-brand">
                     <div className="login-logo">
-                        <Landmark size={28} />
+                        <img src="/favicon.png" alt="Digital Banking Logo" />
                     </div>
                     <h1>Digital Banking</h1>
                     <p>Đăng nhập vào tài khoản của bạn</p>
